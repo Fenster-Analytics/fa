@@ -1,0 +1,54 @@
+This is a <b>test</b> template.<br/>
+This is a global test var: {{title}}<br/>
+This is an escaped test var: \{{title}}<br/>
+Test uses triple braces and should be escaped, but that style must be deprecated: {{{title}}}<br/>
+<br/>
+Test template. TODO: support empty string for root path (or "." ?)
+<br/>===<br/>
+<div data-bind-template='0'>
+	Load from data-init array: \{{this}}
+</div>
+<div data-bind-template=''>
+	Load from data-init array: \{{this.[0]}}
+</div>
+<div data-bind-template='testval'>
+	Load from data-init object: \{{this}}
+</div>
+
+<button activate-on-click="test-class">Activate</button>
+
+<button click-function="changeInitData" click-data="1">Change Init Data 1</button>
+<button click-function="changeInitData" click-data="2">Change Init Data 2</button>
+
+
+If this outer element were given a value of:
+{
+	'outerVal': {
+		'innerVal': 'b'
+	}
+}
+
+<div data-bind-value='outerVal'>
+	<some-setting data-bind-value='innerVal'>
+		<option value='a'>Drop down option 1</option>
+		<option value='b'>Drop down option 2</option>
+	</some-setting>
+</div>
+===
+<br/><br/>
+
+
+<label>View As</label>
+					<select>
+						<option>Self</option>
+						<option>Group A</option>
+						<option>Group B</option>
+					</select>
+
+WHERE SHOULD PROJECT SELECTION BE? MAYBE AS A DROP DOWN ON TOP.<br/>
+ALL CONTENT BELONGS TO A PROJECT. MOST ORGS CAN HAVE A SINGLE PROJECT.<br/>
+AND STILL DEFINE GLOBAL PARAMETERS FUNCTIONS<br/>
+ARE HOME AND THE MAIN PROJET PAGE DIFFERENT?<br/>
+<br/>
+Nav can be a pop-out menu, with just the logo img showing normally, or a = button<br/>
+<br/><br/><br/>

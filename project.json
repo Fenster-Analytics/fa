@@ -1,5 +1,56 @@
 {
     "packages": [
-        
+        {
+            // HTML Templates
+            "type": "template"
+        },
+        {
+            // Raw images, fonts, unparsed html, etc
+            "type": "raw",
+            "config": {
+                "src": "asset",
+                "dest": "asset"
+            }
+        },
+        {
+            // Stylesheets
+            "type": "css",
+            "config": {
+                "src": "css",
+                "files": [
+                    "fenster.scss",
+                    "json_tree.scss"
+                ],
+                "int": "css",
+                "dest": "",
+                "output": "fa.css"
+            }
+        },
+        {
+            // JS Source
+            "type": "js",
+            "config": {
+                "src": "js",
+                "files": [
+                    "template.js",
+                    "fa.js",
+                    "page.js",
+                    "element.js",
+                    "taskman.js",
+                    "rest.js",
+                    "link.js",
+                    "drop_down.js",
+                    "modal.js",
+                    "progress.js",
+                    "instapaste.js",
+                    "json_tree.js",
+                    "playback_control.js",
+                    "filter.js",
+                    "selection_control.js",
+                    "simple_editor.js"
+                ],
+                "output": "fa.js"
+            }
+        }
     ]
 }

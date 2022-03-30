@@ -1,0 +1,50 @@
+<style>
+:host([hidden]) { display: none; }
+:host {
+	position: relative;
+	min-width: 10em;
+}
+task-summary {
+	display: flex;
+	flex-direction: row;
+	font-family: "Roboto Condensed";
+	font-size: 11pt;
+}
+a {
+	flex: 1 0 auto;
+	text-align: center;
+}
+modal-content {
+	display: flex;
+	flex-direction: column;
+	width: 90vw;
+	height: 90vh;
+}
+modal-content > div {
+	flex: 1 0 auto;
+}
+nav-panel
+	flex: 0;
+}
+#taskList {
+	display: flex;
+	flex-direction: column;
+}
+</style>
+<task-summary click-function="showModal" data-bind-template>
+	Active: \{{this.activeCount}}
+	Blocking: \{{this.blockingCount}}
+	Complete: \{{this.completeCount}}
+	Cached: \{{this.cachedCount}}
+	Errors: \{{this.errorCount}}
+</task-summary>
+<fa-blocking-layer id="layer" auto-register>
+	<modal-content>
+		<div id="taskList" auto-register>
+			[Task list]
+		</div>
+		<nav-panel>
+			<button click-function="hideModal">Close</button>
+		</nav-panel>
+	</modal-content>
+</fa-blocking-layer>

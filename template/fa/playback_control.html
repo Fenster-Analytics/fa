@@ -1,0 +1,55 @@
+<style>
+:host([hidden]) { display: none; }
+:host {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+}
+input {
+	flex: 1 0 auto;
+	width: 10px;
+}
+div {
+	display: flex;
+	flex-direction: row;
+	margin: 3px 0;
+}
+button {
+	font-family: arial, sans-serif;
+	font-size: 11px;
+	padding: 0 2px;
+	min-width: 30px;
+}
+button.active {
+	filter: brightness(150%) saturate(100%);
+}
+frame-info {
+	margin: auto;
+	font-size: 12px;
+	width: 5em;
+	text-align: center;
+	font-family: 'Roboto Condensed';
+}
+</style>
+<div>
+	<button local-filter='{"ctrl": "first-frame"}' click-function="ctrlFirstFrame" title="go to first frame">&#9646;&#9664;</button>
+	<button local-filter='{"ctrl": "rewind"}' click-function="ctrlRewind" title="rewind">&#9664;</button>
+	<button local-filter='{"ctrl": "step-back"}' click-function="ctrlStepBack" title="back one frame">&#9664;&#9646;</button>
+    <button local-filter='{"ctrl": "pause"}' click-function="ctrlPause" title="pause">&#9646;&#9646;</button>
+    <button local-filter='{"ctrl": "step-forward"}' click-function="ctrlStepForward" title="advance one frame">&#9646;&#9654;</button>
+    <button local-filter='{"ctrl": "play"}' click-function="ctrlPlay" title="play">&#9654;</button>
+    <button local-filter='{"ctrl": "last-frame"}' click-function="ctrlLastFrame" title="go to last frame">&#9654;&#9646;</button>
+</div>
+<frame-info id="frameInfo" auto-register></frame-info>
+<input
+	type="range"
+	value="0"
+	min="0"
+	max="1"
+
+	id="slider"
+	auto-register
+></input>
+<select data-sync-attribute="delay">
+	{{>fa_playback_control_delays}}
+</select>

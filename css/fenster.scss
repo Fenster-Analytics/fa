@@ -1,0 +1,119 @@
+fa-tab-container {
+    position: relative;
+    display: grid;
+}
+fa-tab-content {
+    position: absolute;
+    display: grid;
+    height: 100%;
+    width: 100%;
+    
+    overflow: auto;
+}
+fa-tab-content:not(.active) {
+    display: none;
+}
+fa-tab-item:hover {
+    cursor: pointer;
+}
+
+[draggable="true"] {
+    //cursor: -webkit-grab;
+    //cursor: grab;
+}
+fa-drag-handle {
+    cursor: -webkit-grab;
+    cursor: grab;
+}
+
+fa-blocking-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    background: rgba(24,48,64,0.6);
+    color: #FFF;
+    z-index: 1000;
+}
+
+fa-blocking-layer:not(.active) {
+    display: none;
+}
+
+fa-hover {
+    position: relative;
+    display: inline-block;
+}
+
+fa-hover-title {
+    display: block;
+}
+
+fa-hover-title:not(.no-icon):before {
+    content: '\25BC\A0';
+}
+
+fa-hover-content {
+    display: none;
+    position: absolute;
+    z-index: 200;
+    min-width: 12em;
+
+    fa-tab-item,
+    a {
+        display: block;
+        padding: 0.5em 1em;
+    }
+
+    hr {
+        width: 90%;
+    }
+}
+
+fa-hover:focus-within,
+fa-hover:hover {
+    cursor: default;
+
+    fa-hover-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    fa-hover-title {
+    }
+}
+
+fa-drop-down {
+    position: relative;
+    display: inline-block;
+
+    fa-drop-down-title {
+        cursor: pointer;
+    }
+
+    fa-drop-down-content {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+
+        z-index: 200;
+
+        min-width: 5em;
+        box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
+        background: #FFF;
+    }
+
+    fa-drop-down-content:not(.active) {
+        display: none;
+    }
+}
+
+fa-drop-down.toggled-on {
+    fa-drop-down-title {
+        filter: brightness(120%);
+    }
+}
