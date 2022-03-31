@@ -650,7 +650,8 @@ FA.Element = class extends HTMLElement {
 };
 window.customElements.define('fa-element', FA.Element);
 
-FA.Element.registerCSS('fenster', 'dist/fa/fa.css');
+// TODO: Do this manually in the application
+//FA.Element.registerCSS('fenster', 'dist/fa/fa.css');
 
 FA.TestElement = class extends FA.Element {
     constructor() {
