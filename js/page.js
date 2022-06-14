@@ -130,7 +130,12 @@ FA.notifyPageStateChange = function(root) {
     });
     // All fa-elements also need to notify their children
     root.querySelectorAll('[enable-page-state]').forEach(function(el) {
-        el.onPageStateChange();
+        if (!el.onPageStateChange) {
+            console.warn('enable-page-state attribute on non FA Element:', el);
+        }
+        else {
+            el.onPageStateChange();
+        }
     });
 };
 
