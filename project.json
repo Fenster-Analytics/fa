@@ -51,6 +51,17 @@
                 ],
                 "output": "fa.js"
             }
+        },
+        {
+            // JS Source
+            "type": "js",
+            "config": {
+                "src": "mjs",
+                "files": [
+                    "FA.mjs"
+                ],
+                "output": "fa2.js"
+            }
         }
     ]
 }
