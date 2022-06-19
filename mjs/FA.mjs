@@ -1,3 +1,4 @@
+export {assert} from "./common.mjs"
 export {Element} from "./element.mjs"
 export {Application} from "./application.mjs"
 
