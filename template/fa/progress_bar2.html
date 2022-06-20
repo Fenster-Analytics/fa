@@ -1,0 +1,49 @@
+<style>
+:host {
+	position: relative;
+	color: #FA0;
+}
+progress-bar-target {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+status-text {
+	position: absolute;
+	display: grid;
+	place-items: center;
+	
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.queued {
+	background: #AA0;
+}
+.executing {
+	background: #0A0;
+}
+.failed {
+	background: #F00;
+}
+.complete {
+	background: #00F;
+}
+</style>
+<div data-bind-template>
+	<progress-bar-target class="complete">
+		<svg width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+			<rect x="0" y="0" width="1" height="1" fill-opacity="0.2" fill="#000" />
+			<rect x="0" y="0.1" width="0.567" height="0.8" fill-opacity="0.5" fill="#FFF" />
+		</svg>
+	</progress-bar-target>
+	<status-text>
+		{{status}} {{duration}}
+	</status-text>
+</div>
+<div>
+	STATIC
+</div>

@@ -516,7 +516,7 @@ FA.Element = class extends HTMLElement {
         const completeValue = {};
 
         if (!this._root) {
-            assert(false, `not intitialized yet`);
+            assert(false, `not initialized yet`);
             return undefined;
         }
 

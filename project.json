@@ -18,6 +18,7 @@
             "config": {
                 "src": "css",
                 "files": [
+                    "common.scss",
                     "fenster.scss",
                     "json_tree.scss"
                 ],

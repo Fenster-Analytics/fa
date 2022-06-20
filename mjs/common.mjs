@@ -1,3 +1,12 @@
+var _app = null;
+export function setApp(app) {
+    _app = app;
+}
+export function getApp() {
+    return _app;
+}
+
+
 export function assert(b, ...msgArgs) {
     if (!b) {
         var msg = "Assertion failed";
@@ -57,10 +66,45 @@ export function getPathValue(obj, pathStr, defaultVal) {
     return val;
 }
 
-var _app = null;
-export function setApplication(app) {
-    _app = app;
+
+export function parseStrVal(strVal) {
+    if (typeof(strVal) !== 'string') {
+        return strVal;
+    }
+
+    try {
+        return JSON.parse(strVal);
+    }
+    catch(e) {
+    }
+
+    const floatVal = parseFloat(strVal);
+    if (!isNaN(floatVal)) {
+        return floatVal;
+    }
+
+    const lVal = strVal.toLowerCase();
+    if (lVal === 'null') return null;
+    if (lVal === 'true') return true;
+    if (lVal === 'false') return false;
+
+    return strVal;
 }
-export function getApp() {
-    return _app;
+
+
+export function getElementValue(el) {
+    if (el.matches('[type="checkbox"]')) {
+        return el.checked;
+    }
+    return FA.parseVal(el.value);
+}
+
+
+export function setElementValue(el, val) {
+    if (el.matches('[type="checkbox"]')) {
+        el.checked = val;
+    }
+    else {
+        el.value = val;
+    }
 }
