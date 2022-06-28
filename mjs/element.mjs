@@ -21,8 +21,6 @@ export class Element extends HTMLElement {
     constructor(template) {
         super();
 
-        //this._context = context ? context : {};
-
         this._template = template;
         this._root = null;
         this._connected = false;
@@ -130,11 +128,16 @@ export class Element extends HTMLElement {
         return {
             'data': this.dataset,
             'value': this._value,
+            'self': this,
         };
     }
 
     get visible() {
         return (this.offsetWidth && this.offsetHeight);
+    }
+
+    updateTransients() {
+        // virtual to calculate transient values
     }
 
     onActivate() {
@@ -172,10 +175,19 @@ export class Element extends HTMLElement {
         }
 
         this._root.innerHTML = _cachedHeaderHTML + template.render(this.template, this.context);
-        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-            el.cTemplate = template.compile(el.innerHTML);
-            el.innerHTML = '[LOADING]';
+        this._root.querySelectorAll('template[element-type]').forEach((el) => {
+            console.log(el.innerHTML);
+            const dataPath = el.dataset.bindTemplate;
+            const elType = el.getAttribute('element-type');
+            const newEl = document.createElement(elType);
+            console.log(elType, dataPath);
+            newEl.innerHTML = '[LOADING]';
+            el.parentNode.replaceChild(newEl, el);
         });
+        // this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
+        //     el.cTemplate = template.compile(el.innerHTML);
+        //     el.innerHTML = '[LOADING]';
+        // });
 
         this._rendered = true;
 
@@ -186,14 +198,15 @@ export class Element extends HTMLElement {
     updateContent() {
         if (!this._rendered) {
             // No reason to update content that doesn't exist yet
-            console.warn('Element not yet rendered', this);
             return;
         }
 
+        this.updateTransients();
+
         const context = this.context;
-        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-            el.innerHTML = el.cTemplate(context);
-        });
+        // this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
+        //     el.innerHTML = el.cTemplate(context);
+        // });
         this._root.querySelectorAll('[data-bind-value]').forEach((el) => {
             common.setElementValue(el, common.getPathValue(context.value, el.bindValue));
         });

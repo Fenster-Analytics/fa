@@ -3,6 +3,17 @@ import {Element} from "../element.mjs"
 export class Progress extends Element {
     constructor() {
         super('fa_progress_bar2');
+
+        this.status = 'init status';
+        this.listValue = ['A', 'B', 'C'];
+    }
+
+    updateTransients() {
+        console.log('PROGRESS TRANSIENTS');
+        super.updateTransients();
+        // virtual to calculate transient values
+        this.status = 'updated status';
+        this._value += 0.1;
     }
 
     // onActivate() {
