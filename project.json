@@ -55,6 +55,19 @@
         },
         {
             // JS Source
+            // TODO: Download automatically from URL, yarn, or npm
+            // https://www.npmjs.com/package/@auth0/auth0-spa-js
+            "type": "js",
+            "config": {
+                "src": "ext",
+                "files": [
+                    "auth0-spa-js/1.22/auth0-spa-js.development.js"
+                ],
+                "output": "fa2-ext.js"
+            }
+        },
+        {
+            // JS Source
             "type": "js",
             "config": {
                 "src": "mjs",

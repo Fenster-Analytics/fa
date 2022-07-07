@@ -67,6 +67,38 @@ export function getPathValue(obj, pathStr, defaultVal) {
 }
 
 
+export function setPathValue(obj, pathStr, val) {
+    if (!obj) {
+        return undefined;
+    }
+    if (!pathStr) {
+        for (const[key, subval] of Object.entries(val)) {
+            obj[key] = subval;
+        }
+        return obj;
+    }
+
+    let node = obj;
+    const pathList = pathStr.split('.');
+    const pathLength = pathList.length;
+    assert(pathLength > 0);
+
+    for (let p=0; p<pathLength-1; p++) {
+        const key = pathList[p];
+        let nextNode = node[key];
+        if (nextNode === undefined) {
+            nextNode = {};
+            node[key] = nextNode;
+        }
+        node = nextNode;
+    }
+    const finalKey = pathList[pathLength-1];
+    node[finalKey] = val;
+
+    return obj;
+}
+
+
 export function parseStrVal(strVal) {
     if (typeof(strVal) !== 'string') {
         return strVal;
@@ -96,7 +128,7 @@ export function getElementValue(el) {
     if (el.matches('[type="checkbox"]')) {
         return el.checked;
     }
-    return FA.parseVal(el.value);
+    return parseStrVal(el.value);
 }
 
 

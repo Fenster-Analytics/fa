@@ -1,5 +1,5 @@
 import * as common from "./common.mjs";
-import * as template from "./template.mjs";
+import * as template from "./template_hbar.mjs";
 
 const _cssMap = {};
 var _cachedHeaderHTML = '';
@@ -28,8 +28,12 @@ export class Element extends HTMLElement {
         this._value = undefined;
         this._active = undefined;
         this._activeFilter = undefined;
+        this._originalText = this.innerHTML;
         this._slotChildren = this.children;
+        this.innerHTML = '';
         this._root = this.attachShadow({mode: 'open'});
+
+        this._registerListeners();
     }
 
     attributeChangedCallback(name, oldVal, newVal) {
@@ -85,7 +89,7 @@ export class Element extends HTMLElement {
             return this._value;
         }
 
-        return scrapeValue();
+        return this.scrapeValue();
     }
 
     scrapeValue() {
@@ -120,15 +124,18 @@ export class Element extends HTMLElement {
         return this._active;
     }
 
-    get template() {
-        return this._template;
-    }
+    // get template() {
+    //     return this._template;
+    // }
 
     get context() {
+        const app = common.getApp();
         return {
             'data': this.dataset,
             'value': this._value,
             'self': this,
+            'appState': app.state,
+            'user': app.user,
         };
     }
 
@@ -168,26 +175,31 @@ export class Element extends HTMLElement {
         this.dispatchEvent(e);
     }
 
-    renderContent() {
+    renderContent(overrideTemplate) {
         if (this._rendered) {
             console.warn('Element already rendered', this);
             return;
         }
 
-        this._root.innerHTML = _cachedHeaderHTML + template.render(this.template, this.context);
-        this._root.querySelectorAll('template[element-type]').forEach((el) => {
-            console.log(el.innerHTML);
-            const dataPath = el.dataset.bindTemplate;
+        const finalTemplate = overrideTemplate === undefined ? this._template : overrideTemplate;
+
+        this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
+        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
+            el.cTemplate = template.compile(el.innerHTML);
+            el.innerHTML = '[LOADING]';
+        });
+        this._root.querySelectorAll('[element-type]').forEach((el) => {
+            const cTemplate = template.compile(el.innerHTML);
+            const dataPath = el.dataset.bindTemplate ? el.dataset.bindTemplate : '';
             const elType = el.getAttribute('element-type');
+
             const newEl = document.createElement(elType);
-            console.log(elType, dataPath);
-            newEl.innerHTML = '[LOADING]';
+            newEl.innerHTML = '[TEMPLATE]';
+            newEl.setAttribute('data-bind-template', dataPath);
+            newEl.cTemplate = cTemplate;
+            
             el.parentNode.replaceChild(newEl, el);
         });
-        // this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-        //     el.cTemplate = template.compile(el.innerHTML);
-        //     el.innerHTML = '[LOADING]';
-        // });
 
         this._rendered = true;
 
@@ -204,11 +216,58 @@ export class Element extends HTMLElement {
         this.updateTransients();
 
         const context = this.context;
-        // this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-        //     el.innerHTML = el.cTemplate(context);
-        // });
+        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
+            const pathVal = common.getPathValue(context, el.dataset.bindTemplate);
+            el.innerHTML = el.cTemplate(pathVal);
+        });
         this._root.querySelectorAll('[data-bind-value]').forEach((el) => {
-            common.setElementValue(el, common.getPathValue(context.value, el.bindValue));
+            common.setElementValue(el, common.getPathValue(context.value, el.dataset.bindValue));
+        });
+    }
+
+    _registerListeners() {
+        // Shortcut for binding onClick functions (without doing "this.getRootNode().host.[function]")
+        this._root.addEventListener('click', (event) => {
+            // Shortcut to trigger click functions
+            if (event.target.hasAttribute('click-function')) {
+                const fnName = event.target.getAttribute('click-function');
+
+                // Trigger the function by name, pass in the instigator
+                common.assert(this[fnName], `${fnName} is not a member of`, this);
+                const fn = this[fnName].bind(this);
+                fn(event.target);
+            }
+
+            // // Shortcut to trigger a bubble-up event on click
+            // if (event.target.hasAttribute('click-event')) {
+            //     const eventName = event.target.getAttribute('click-event');
+            //     const e = new Event(eventName, {bubbles: true, composed: true});
+            //     event.target.dispatchEvent(e);
+            // }
+
+            // // Activate local state
+            // if (event.target.hasAttribute('click-activate-local')) {
+            //     const localFilterStr = event.target.getAttribute('local-filter');
+            //     const localFilter = JSON.parse(localFilterStr);
+            //     self.activateLocalFilter(localFilter);
+            // }
+
+            // // Toggle additive local state
+            // if (event.target.hasAttribute('click-toggle-local-group')) {
+            //     // Sync the active state of all local elements in this group
+            //     const shouldBeActive = !event.target._isActive;
+            //     const localGroup = event.target.getAttribute('local-group');
+            //     self.setLocalGroup(localGroup, shouldBeActive);
+            // }
+
+            // // Toggle global group state
+            // // TODO: This is a little hacky, since it isn't replicated up to all components
+            // // But is mainly intended for unique local state keys that should survive save & load of settings
+            // if (event.target.hasAttribute('click-toggle-global-group')) {
+            //     const globalGroup = event.target.getAttribute('global-group');
+            //     const shouldBeActive = !FA.groupState[globalGroup];
+            //     self.setGlobalGroup(globalGroup, shouldBeActive);
+            // }
         });
     }
 }

@@ -14,6 +14,7 @@ export class Progress extends Element {
         // virtual to calculate transient values
         this.status = 'updated status';
         this._value += 0.1;
+        this.listValue.push('D');
     }
 
     // onActivate() {
