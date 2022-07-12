@@ -52,8 +52,19 @@ export class Application extends Element {
             'domain': config.domain,
             'client_id': config.clientId,
             'cacheLocation': config.cacheLocation,
-            //'organization': config.organization
+            //'organization': config.organization,
+            'responseType': 'token id_token',
+            'audience': 'http://localhost', //'YOUR_API_IDENTIFIER', matches .env file on API
+            'scope': 'openid profile read:test',
         });
+        // var auth0 = new auth0.WebAuth({
+        //   clientID: 'YOUR_CLIENT_ID',
+        //   domain: 'YOUR_DOMAIN',
+        //   responseType: 'token id_token',
+        //   audience: 'YOUR_API_IDENTIFIER',
+        //   redirectUri: 'https://YOUR_APP/callback',
+        //   scope: 'openid profile read:timesheets create:timesheets'
+        // });
 
         const query = window.location.search;
         const shouldParseResult = query.includes("code=") && query.includes("state=");
@@ -92,6 +103,25 @@ export class Application extends Element {
 
         this._auth0.logout(options).catch((e) => {
             console.error('logout error:', e);
+        });
+    }
+
+    testAPI() {
+        this._auth0.getTokenSilently()
+            .then(accessToken => {
+                fetch('http://localhost:5000/api/test', {
+                    'method': 'GET',
+                    'headers': {
+                        'Authorization': `Bearer ${accessToken}`,
+                    }
+                })
+            .then(result => result.json())
+            .then(data => {
+                console.log('API DATA', data);
+            })
+            .catch(e => {
+                console.error('API ERROR', e);
+            });
         });
     }
 
