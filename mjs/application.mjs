@@ -54,17 +54,9 @@ export class Application extends Element {
             'cacheLocation': config.cacheLocation,
             //'organization': config.organization,
             'responseType': 'token id_token',
-            'audience': 'http://localhost', //'YOUR_API_IDENTIFIER', matches .env file on API
-            'scope': 'openid profile read:test',
+            'audience': config.audience, //'YOUR_API_IDENTIFIER', matches .env file on API"
+            'scope': config.scope,
         });
-        // var auth0 = new auth0.WebAuth({
-        //   clientID: 'YOUR_CLIENT_ID',
-        //   domain: 'YOUR_DOMAIN',
-        //   responseType: 'token id_token',
-        //   audience: 'YOUR_API_IDENTIFIER',
-        //   redirectUri: 'https://YOUR_APP/callback',
-        //   scope: 'openid profile read:timesheets create:timesheets'
-        // });
 
         const query = window.location.search;
         const shouldParseResult = query.includes("code=") && query.includes("state=");
@@ -125,36 +117,10 @@ export class Application extends Element {
         });
     }
 
-    // TODO: Call API
-    // <button id="call-api">Call an API</button>
-    // //with async/await
-    // document.getElementById('call-api').addEventListener('click', async () => {
-    //   const accessToken = await auth0.getTokenSilently();
-    //   const result = await fetch('https://myapi.com', {
-    //     method: 'GET',
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`
-    //     }
-    //   });
-    //   const data = await result.json();
-    //   console.log(data);
-    // });
-
-    // //with promises
-    // document.getElementById('call-api').addEventListener('click', () => {
-    //   auth0
-    //     .getTokenSilently()
-    //     .then(accessToken =>
-    //       fetch('https://myapi.com', {
-    //         method: 'GET',
-    //         headers: {
-    //           Authorization: `Bearer ${accessToken}`
-    //         }
-    //       })
-    //     )
-    //     .then(result => result.json())
-    //     .then(data => {
-    //       console.log(data);
-    //     });
-    // });
+    // Add single command to the buffer
+    // Schedule recurring commands?
+    // Or polling commands, like the backend status,
+    // that should have minimum and maximum polling intervals
+    // like they could attach themselves to every call
+    // but if some amount of time has passed, they will initiate a call
 }
