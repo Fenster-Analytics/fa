@@ -1,6 +1,7 @@
 export {assert} from "./common.mjs"
 
 export {Element} from "./element.mjs"
+export {Link} from "./element/link.mjs"
 export {Test} from "./element/test.mjs"
 
 export {Application} from "./application.mjs"

@@ -4,56 +4,9 @@ import * as template from "./template_hbar.mjs";
 const _cssMap = {};
 var _cachedHeaderHTML = '';
 
-export class Element extends HTMLElement {
-    static registerCSS(key, cssFile) {
-        _cssMap[key] = cssFile;
-
-        _cachedHeaderHTML = '';
-        for (const[key, cssFile] of Object.entries(_cssMap)) {
-            _cachedHeaderHTML += `<link rel="stylesheet" href="${cssFile}" />`;
-        }
-    }
-
+export const ActiveMixIn = (Base) => class extends Base {
     static get observedAttributes() {
-        return ['active-filter', 'value'];
-    }
-
-    constructor(template) {
-        super();
-
-        this._template = template;
-        this._root = null;
-        this._connected = false;
-        this._rendered = false;
-        this._value = undefined;
-        this._active = undefined;
-        this._activeFilter = undefined;
-        this._originalText = this.innerHTML;
-        this._slotChildren = this.children;
-        this.innerHTML = '';
-        this._root = this.attachShadow({mode: 'open'});
-
-        this._registerListeners();
-    }
-
-    attributeChangedCallback(name, oldVal, newVal) {
-        console.log('ATTR CHANGE', name, oldVal, newVal);
-        if (oldVal == newVal) {
-            return;
-        }
-
-        if (name === 'value') {
-            const parsedVal = common.parseStrVal(newVal);
-            this.value = parsedVal;
-        }
-        else if (name === 'active-filter') {
-            this._activeFilter = newVal ? JSON.parse(newVal) : null;
-            this.updateActive();
-        }
-        else {
-            // TODO: Propagate newVal to element value
-            //this._root.querySelectorAll(`[data-sync-attribute="${name}"]`).forEach((el) => {el.value = newVal;});
-        }
+        return ['active-filter'];
     }
 
     connectedCallback() {
@@ -63,6 +16,25 @@ export class Element extends HTMLElement {
 
     disconnectedCallback() {
         this._connected = false;
+    }
+
+    attributeChangedCallback(name, oldVal, newVal) {
+        if (oldVal == newVal) {
+            return;
+        }
+
+        if (name === 'value') {
+            const parsedVal = common.parseStrVal(newVal);
+            this.value = parsedVal;
+        }
+        else if (name === 'active-filter') {
+            this.activeFilter = newVal ? JSON.parse(newVal) : null;
+            this.updateActive();
+        }
+        else {
+            // TODO: Propagate newVal to element value
+            //this._root.querySelectorAll(`[data-sync-attribute="${name}"]`).forEach((el) => {el.value = newVal;});
+        }
     }
 
     updateActive() {
@@ -77,35 +49,6 @@ export class Element extends HTMLElement {
 
         this.active = common.getApp().evalFilter(this._activeFilter);
         console.log('ACTIVE FILTER', this.active);
-    }
-
-    set value(jsonVal) {
-        this._value = jsonVal;
-        this.updateContent();
-    }
-
-    get value() {
-        if (!this._rendered) {
-            return this._value;
-        }
-
-        return this.scrapeValue();
-    }
-
-    scrapeValue() {
-        if (!this._rendered) {
-            console.error('scrapeValue: element not yet rendered', this);
-            return undefined;
-        }
-
-        const v = {};
-        this._root.querySelectorAll('[data-bind-value]').forEach((el) => {
-            const val = common.getElementValue(el);
-            if (val !== undefined) {
-                common.setPathValue(v, el.dataset.bindValue, val);
-            }
-        });
-        return v;
     }
 
     set active(val) {
@@ -124,27 +67,8 @@ export class Element extends HTMLElement {
         return this._active;
     }
 
-    // get template() {
-    //     return this._template;
-    // }
-
-    get context() {
-        const app = common.getApp();
-        return {
-            'data': this.dataset,
-            'value': this._value,
-            'self': this,
-            'appState': app.state,
-            'user': app.user,
-        };
-    }
-
-    get visible() {
-        return (this.offsetWidth && this.offsetHeight);
-    }
-
-    updateTransients() {
-        // virtual to calculate transient values
+    set activeFilter(v) {
+        this._activeFilter = v;
     }
 
     onActivate() {
@@ -152,7 +76,7 @@ export class Element extends HTMLElement {
 
         this.classList.add('active');
 
-        this.renderContent();
+        if (this.renderContent) this.renderContent();
 
         if (this.hasAttribute('activate-function')) {
             common.assert(false, 'TODO: Call the activate-function');
@@ -174,55 +98,39 @@ export class Element extends HTMLElement {
         const e = new Event('deactivate', {bubbles: true, composed: false});
         this.dispatchEvent(e);
     }
+};
 
-    renderContent(overrideTemplate) {
-        if (this._rendered) {
-            console.warn('Element already rendered', this);
-            return;
+export class Element extends ActiveMixIn(HTMLElement) {
+//export class Element extends HTMLElement {
+    static registerCSS(key, cssFile) {
+        _cssMap[key] = cssFile;
+
+        _cachedHeaderHTML = '';
+        for (const[key, cssFile] of Object.entries(_cssMap)) {
+            _cachedHeaderHTML += `<link rel="stylesheet" href="${cssFile}" />`;
         }
-
-        const finalTemplate = overrideTemplate === undefined ? this._template : overrideTemplate;
-
-        this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
-        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-            el.cTemplate = template.compile(el.innerHTML);
-            el.innerHTML = '[LOADING]';
-        });
-        this._root.querySelectorAll('[element-type]').forEach((el) => {
-            const cTemplate = template.compile(el.innerHTML);
-            const dataPath = el.dataset.bindTemplate ? el.dataset.bindTemplate : '';
-            const elType = el.getAttribute('element-type');
-
-            const newEl = document.createElement(elType);
-            newEl.innerHTML = '[TEMPLATE]';
-            newEl.setAttribute('data-bind-template', dataPath);
-            newEl.cTemplate = cTemplate;
-            
-            el.parentNode.replaceChild(newEl, el);
-        });
-
-        this._rendered = true;
-
-        // Render the dynamic content
-        this.updateContent();
     }
 
-    updateContent() {
-        if (!this._rendered) {
-            // No reason to update content that doesn't exist yet
-            return;
-        }
+    static get observedAttributes() {
+        return [...super.observedAttributes, 'value'];
+    }
 
-        this.updateTransients();
+    constructor(template) {
+        super();
 
-        const context = this.context;
-        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
-            const pathVal = common.getPathValue(context, el.dataset.bindTemplate);
-            el.innerHTML = el.cTemplate(pathVal);
-        });
-        this._root.querySelectorAll('[data-bind-value]').forEach((el) => {
-            common.setElementValue(el, common.getPathValue(context.value, el.dataset.bindValue));
-        });
+        this._template = template;
+        this._root = null;
+        this._connected = false;
+        this._rendered = false;
+        this._value = undefined;
+        this._active = undefined;
+        this._activeFilter = undefined;
+        this._originalText = this.innerHTML;
+        this._slotChildren = this.children;
+        this.innerHTML = '';
+        this._root = this.attachShadow({mode: 'open'});
+
+        this._registerListeners();
     }
 
     _registerListeners() {
@@ -268,6 +176,113 @@ export class Element extends HTMLElement {
             //     const shouldBeActive = !FA.groupState[globalGroup];
             //     self.setGlobalGroup(globalGroup, shouldBeActive);
             // }
+        });
+    }
+
+    set value(jsonVal) {
+        this._value = jsonVal;
+        this.updateContent();
+    }
+
+    get value() {
+        if (!this._rendered) {
+            return this._value;
+        }
+
+        return this.scrapeValue();
+    }
+
+    scrapeValue() {
+        if (!this._rendered) {
+            console.error('scrapeValue: element not yet rendered', this);
+            return undefined;
+        }
+
+        const v = {};
+        this._root.querySelectorAll('[data-bind-value]').forEach((el) => {
+            const val = common.getElementValue(el);
+            if (val !== undefined) {
+                common.setPathValue(v, el.dataset.bindValue, val);
+            }
+        });
+        return v;
+    }
+
+    get context() {
+        const app = common.getApp();
+        return {
+            'data': this.dataset,
+            'value': this._value,
+            'self': this,
+            'app': app.getRenderContext(),
+        };
+    }
+
+    get visible() {
+        return (this.offsetWidth && this.offsetHeight);
+    }
+
+    updateTransients() {
+        // virtual to calculate transient values
+    }
+
+    renderContent(overrideTemplate) {
+        if (this._rendered) {
+            console.warn('Element already rendered', this);
+            return;
+        }
+
+        const finalTemplate = overrideTemplate === undefined ? this._template : overrideTemplate;
+
+        this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
+        this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
+            el.cTemplate = template.compile(el.innerHTML);
+            el.innerHTML = '[LOADING]';
+        });
+        this._root.querySelectorAll('[element-type]').forEach((el) => {
+            const cTemplate = template.compile(el.innerHTML);
+            const dataPath = el.dataset.bindTemplate ? el.dataset.bindTemplate : '';
+            const elType = el.getAttribute('element-type');
+
+            const newEl = document.createElement(elType);
+            newEl.innerHTML = '[TEMPLATE]';
+            newEl.setAttribute('data-bind-template', dataPath);
+            newEl.cTemplate = cTemplate;
+            
+            el.parentNode.replaceChild(newEl, el);
+        });
+
+        this._rendered = true;
+
+        // Render the dynamic content
+        this.updateContent();
+    }
+
+    updateContent() {
+        if (!this._rendered) {
+            // No reason to update content that doesn't exist yet
+            return;
+        }
+
+        this.updateTransients();
+
+        const context = this.context;
+        this._root.querySelectorAll('[data-bind-template]').forEach(el => {
+            const pathVal = common.getPathValue(context, el.dataset.bindTemplate);
+            el.innerHTML = el.cTemplate(pathVal);
+        });
+        this._root.querySelectorAll('[data-bind-value]').forEach(el => {
+            common.setElementValue(el, common.getPathValue(context.value, el.dataset.bindValue));
+        });
+
+        // Check activation of child elements
+        this._root.querySelectorAll('[active-filter]').forEach(el => {
+            try {
+                el.updateActive();
+            }
+            catch(e) {
+                console.error(el, e);
+            }
         });
     }
 }

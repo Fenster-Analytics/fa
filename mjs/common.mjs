@@ -140,3 +140,54 @@ export function setElementValue(el, val) {
         el.value = val;
     }
 }
+
+
+export function strToJsonSafe(val) {
+    try {
+        return JSON.parse(val);
+    }
+    catch(e) { }
+    return val;
+}
+
+
+export function JsonToUrlEncodedStr(obj) {
+    var str = '';
+    var hasPrev = false;
+    for (const [key, val] of Object.entries(obj)) {
+        // Omit null values altogether
+        if (val === null) {
+            continue;
+        }
+
+        if (hasPrev) str += '&';
+        else hasPrev = true;
+
+        // Either convert the object to a string, otherwise encode the string directly
+        const dataType = typeof(val);
+        const strVal = (dataType === 'object' || dataType === 'array')
+                    ? encodeURIComponent(JSON.stringify(val))
+                    : encodeURIComponent(val);
+        str += `${key}=${strVal}`;
+    }
+    return str;
+}
+
+
+export function urlEncodedStrToJson(strVal) {
+    if (strVal.length > 2) {
+        const jsonStr = '{"' + strVal.replace(/&/g, '","').replace(/=/g,'":"') + '"}';
+        const jsonData = JSON.parse(
+            jsonStr,
+            function(key, value) {
+                // return top-level value
+                if (key === '') return value;
+
+                const strValue = decodeURIComponent(value);
+                return strToJsonSafe(strValue);
+            }
+        );
+        return jsonData;
+    }
+    return {};
+}

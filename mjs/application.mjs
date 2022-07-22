@@ -1,21 +1,87 @@
-import * as common from "./common.mjs";
 import {Element} from "./element.mjs"
+import * as common from "./common.mjs";
 
 export class Application extends Element {
     constructor(mainTemplate, loginTemplate) {
         super(mainTemplate);
         this._loginTemplate = loginTemplate;
 
+        this._user = undefined;
+        this._version = 'b1.0';
+
+        // TODO: Init state from the page state
+        const hashStr = document.location.hash.substring(1);
+        if (hashStr) {
+            this._state = common.urlEncodedStrToJson(hashStr);
+        }
+        else {
+            this._state = {'section': 'home'};
+        }
+
         common.setApp(this);
     }
 
+    // # TODO: Listen for back button presses
+    //todoSyncLocation() {
+        // generate url
+        // manually push state onto the window history
+
+        // const hrefJson = common.strToJsonSafe(this._activeFilter);
+        // const hrefStr = common.JsonToUrlEncodedStr(hrefJson);
+        // return `#${hrefStr}`;
+
+        // const hrefParts = this.href.split('#');
+        // const hashStr = hrefParts[1];
+
+        // // Layer the hash values onto the page state
+        // // (follow the link normally if no hash string)
+        // if (hashStr) {
+        //     const deltaHashState = common.urlEncodedStrToJson(hashStr);
+        //     FA.addHashState(deltaHashState);
+        //     e.preventDefault();
+        // }
+    //}
+
     get state() {
-        const appState = {'test': 69};
-        return appState;
+        return this._state;
     }
 
     get user() {
         return this._user;
+    }
+
+    getRenderContext() {
+        return {
+            'state': this._state,
+            'user': this._user,
+            'version': this._version,
+        }
+    }
+
+    setState(state) {
+        this.state = state;
+    }
+
+    addState(state) {
+        this.state = Object.assign({}, this._state, state);
+    }
+
+    removeState(state) {
+        const newState = {};
+        for (const[key, val] of Object.entries(this._state)) {
+            if (state[key] !== val) {
+                newState[key] = val;
+            }
+        }
+        this.state = newState;
+    }
+
+    set state(v) {
+        // TODO: If state notDeepEqual
+        this._state = v;
+        this.updateContent();
+        const newHashStr = '#' + common.JsonToUrlEncodedStr(this._state);
+        document.location.hash = newHashStr;
     }
 
     evalFilter(filter) {
