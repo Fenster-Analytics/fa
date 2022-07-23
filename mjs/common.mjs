@@ -201,3 +201,16 @@ export function kvpObjToArray(obj) {
     }
     return returnArray;
 }
+
+
+export function stateStackToHashStr(stateStack) {
+    const hashStr = btoa(JsonToUrlEncodedStr(stateStack));
+    return hashStr;
+}
+
+
+export function hashStrToStateStack(hashStr) {
+    const stateStackDict = urlEncodedStrToJson(atob(hashStr));
+    const stateStack = kvpObjToArray(stateStackDict);
+    return stateStack;
+}
