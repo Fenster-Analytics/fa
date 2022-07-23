@@ -9,83 +9,98 @@ export class Application extends Element {
         this._user = undefined;
         this._version = 'b1.0';
 
-        // TODO: Init state from the page state
         const hashStr = document.location.hash.substring(1);
         if (hashStr) {
-            this._state = common.urlEncodedStrToJson(hashStr);
+            const initStateStackDict = common.urlEncodedStrToJson(hashStr);
+            const initStateStack = common.kvpObjToArray(initStateStackDict);
+            this._stateStack = initStateStack;
+            this._flushState();
         }
         else {
-            this._state = {'section': 'home'};
+            this.setState({'section': 'home'});
         }
 
         common.setApp(this);
     }
 
-    // # TODO: Listen for back button presses
-    //todoSyncLocation() {
-        // generate url
-        // manually push state onto the window history
-
-        // const hrefJson = common.strToJsonSafe(this._activeFilter);
-        // const hrefStr = common.JsonToUrlEncodedStr(hrefJson);
-        // return `#${hrefStr}`;
-
-        // const hrefParts = this.href.split('#');
-        // const hashStr = hrefParts[1];
-
-        // // Layer the hash values onto the page state
-        // // (follow the link normally if no hash string)
-        // if (hashStr) {
-        //     const deltaHashState = common.urlEncodedStrToJson(hashStr);
-        //     FA.addHashState(deltaHashState);
-        //     e.preventDefault();
-        // }
-    //}
-
-    get state() {
-        return this._state;
+    getRenderContext() {
+        return {
+            'state': this._currentState,
+            'user': this._user,
+            'version': this._version,
+        }
     }
 
     get user() {
         return this._user;
     }
 
-    getRenderContext() {
-        return {
-            'state': this._state,
-            'user': this._user,
-            'version': this._version,
-        }
+    _flushState() {
+        console.log('FLUSH STATE', this._stateStack);
+        this._currentState = this._stateStack[this._stateStack.length - 1];
+        this.updateContent();
+        const newHashStr = '#' + common.JsonToUrlEncodedStr(this._stateStack);
+        document.location.hash = newHashStr;
     }
 
     setState(state) {
-        this.state = state;
+        // Wipes the entire stack and sets a new root state
+        this._stateStack = [state];
+        this._flushState();
+        return this;
+    }
+
+    pushState(state) {
+        // Creates new state on top of the stack
+        this._stateStack.push(state);
+        this._flushState();
+        return this;
+    }
+
+    gotoState(state) {
+        // Changes the state at the current level
+        this._stateStack[this._stateStack.length - 1] = this._state;
+        this._flushState();
+        return this;
     }
 
     addState(state) {
-        this.state = Object.assign({}, this._state, state);
+        // Activates a sub-state within the current state e.g. for tab groups
+        const lastIndex = this._stateStack.length - 1;
+        const currentState = this._stateStack[lastIndex];
+        this._stateStack[lastIndex] = Object.assign({}, currentState, state);
+        this._flushState();
+        return this;
     }
 
     removeState(state) {
+        console.log('REMOVE STATE', state);
+        const lastIndex = this._stateStack.length - 1;
+        const currentState = this._stateStack[lastIndex];
         const newState = {};
-        for (const[key, val] of Object.entries(this._state)) {
+        for (const[key, val] of Object.entries(currentState)) {
             if (state[key] !== val) {
                 newState[key] = val;
             }
         }
-        this.state = newState;
+        console.log('NEW STATE', newState);
+        this._stateStack[lastIndex] = newState;
+        this._flushState();
+        return this;
     }
 
-    set state(v) {
-        // TODO: If state notDeepEqual
-        this._state = v;
-        this.updateContent();
-        const newHashStr = '#' + common.JsonToUrlEncodedStr(this._state);
-        document.location.hash = newHashStr;
+    popState(state) {
+        if (this._stateStack.length > 1) {
+            this._stateStack.pop();
+            this._flushState();
+        }
+        return this;
     }
 
     evalFilter(filter) {
-        return common.matchFilter(this.state, filter);
+        // TODO: Instead of true, maybe return the depth?
+        // So depth of zero would become 'active' and anything else 'passive'
+        return common.matchFilter(this._currentState, filter);
     }
 
     renderContent() {

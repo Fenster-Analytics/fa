@@ -191,3 +191,13 @@ export function urlEncodedStrToJson(strVal) {
     }
     return {};
 }
+
+
+export function kvpObjToArray(obj) {
+    const maxIndex = Math.max(...Object.keys(obj));
+    const returnArray = Array(maxIndex + 1);
+    for (const [key, val] of Object.entries(obj)) {
+        returnArray[parseInt(key)] = val;
+    }
+    return returnArray;
+}
