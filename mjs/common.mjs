@@ -204,13 +204,15 @@ export function kvpObjToArray(obj) {
 
 
 export function stateStackToHashStr(stateStack) {
-    const hashStr = btoa(JsonToUrlEncodedStr(stateStack));
+    //const hashStr = btoa(JsonToUrlEncodedStr(stateStack));
+    const hashStr = JsonToUrlEncodedStr(stateStack);
     return hashStr;
 }
 
 
 export function hashStrToStateStack(hashStr) {
-    const stateStackDict = urlEncodedStrToJson(atob(hashStr));
+    //const stateStackDict = urlEncodedStrToJson(atob(hashStr));
+    const stateStackDict = urlEncodedStrToJson(hashStr);
     const stateStack = kvpObjToArray(stateStackDict);
     return stateStack;
 }

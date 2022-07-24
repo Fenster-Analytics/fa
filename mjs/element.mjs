@@ -19,21 +19,9 @@ export const ActiveMixIn = (Base) => class extends Base {
     }
 
     attributeChangedCallback(name, oldVal, newVal) {
-        if (oldVal == newVal) {
-            return;
-        }
-
-        if (name === 'value') {
-            const parsedVal = common.parseStrVal(newVal);
-            this.value = parsedVal;
-        }
-        else if (name === 'active-filter') {
+        if (name === 'active-filter') {
             this.activeFilter = newVal ? JSON.parse(newVal) : null;
             this.updateActive();
-        }
-        else {
-            // TODO: Propagate newVal to element value
-            //this._root.querySelectorAll(`[data-sync-attribute="${name}"]`).forEach((el) => {el.value = newVal;});
         }
     }
 
@@ -89,16 +77,17 @@ export const ActiveMixIn = (Base) => class extends Base {
     onDeactivate() {
         this.classList.remove('active');
 
-        if (this.hasAttribute('unload-inactive')) {
-            this._value = this.scrapeValue(); // cache the value
-            this._root.innerHTML = '';
-            this._rendered = false;
-        }
+        // if (this.hasAttribute('unload-inactive')) {
+        //     this._value = this.scrapeValue(); // cache the value
+        //     this._root.innerHTML = '';
+        //     this._rendered = false;
+        // }
 
         const e = new Event('deactivate', {bubbles: true, composed: false});
         this.dispatchEvent(e);
     }
 };
+
 
 export class Element extends ActiveMixIn(HTMLElement) {
 //export class Element extends HTMLElement {
@@ -112,7 +101,7 @@ export class Element extends ActiveMixIn(HTMLElement) {
     }
 
     static get observedAttributes() {
-        return [...super.observedAttributes, 'value'];
+        return [...super.observedAttributes, 'value', 'template'];
     }
 
     constructor(template) {
@@ -129,8 +118,28 @@ export class Element extends ActiveMixIn(HTMLElement) {
         this._slotChildren = this.children;
         this.innerHTML = '';
         this._root = this.attachShadow({mode: 'open'});
-
         this._registerListeners();
+    }
+
+    attributeChangedCallback(name, oldVal, newVal) {
+        super.attributeChangedCallback(name, oldVal, newVal);
+
+        // TODO: get template from attribute
+        if (name === 'value') {
+            const parsedVal = common.parseStrVal(newVal);
+            this.value = parsedVal;
+        }
+        else if (name === 'template') {
+            this._template = newVal;
+            this._rendered = false;
+            if (this._active) {
+                this.renderContent();
+            }
+        }
+        else {
+            // TODO: Propagate newVal to element value
+            //this._root.querySelectorAll(`[data-sync-attribute="${name}"]`).forEach((el) => {el.value = newVal;});
+        }
     }
 
     _registerListeners() {
@@ -234,7 +243,13 @@ export class Element extends ActiveMixIn(HTMLElement) {
 
         const finalTemplate = overrideTemplate === undefined ? this._template : overrideTemplate;
 
-        this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
+        if (finalTemplate === undefined) {
+            this._root.innerHTML = this._originalText;
+        }
+        else {
+            this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
+        }
+
         this._root.querySelectorAll('[data-bind-template]').forEach((el) => {
             el.cTemplate = template.compile(el.innerHTML);
             el.innerHTML = '[LOADING]';

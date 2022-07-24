@@ -43,6 +43,9 @@ fa-blocking-layer {
 fa-blocking-layer:not(.active) {
     display: none;
 }
+fa-element:not(.active) {
+    display: none;
+}
 
 fa-hover {
     position: relative;

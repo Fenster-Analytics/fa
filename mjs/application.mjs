@@ -75,7 +75,7 @@ export class Application extends Element {
                 return stateStack;
             case 'add':
                 // Activates a sub-state within the current state
-                stateStack[stateStack.length - 1] = Object.assign({}, this._currentState, state);
+                stateStack[stateStack.length - 1] = Object.assign({}, currentState, state);
                 return stateStack;
             case 'remove':
                 // Removes a sub-state from the current state
@@ -88,8 +88,12 @@ export class Application extends Element {
                 stateStack[stateStack.length - 1] = newState;
                 return stateStack;
             case 'pop':
-                // Pops the current state off the stack
+                // Pops the current state off the stack (optionally adds onto the new state)
                 stateStack.pop();
+                if (stateStack.length > 0) {
+                    const destState = stateStack[stateStack.length - 1];
+                    stateStack[stateStack.length - 1] = Object.assign({}, destState, state);
+                }
                 return stateStack;
             default:
                 console.error('Unrecognized action:', this._linkAction);
