@@ -244,7 +244,8 @@ export class Element extends ActiveMixIn(HTMLElement) {
         const finalTemplate = overrideTemplate === undefined ? this._template : overrideTemplate;
 
         if (finalTemplate === undefined) {
-            this._root.innerHTML = this._originalText;
+            const cTemplate = template.compile(this._originalText);
+            this._root.innerHTML = _cachedHeaderHTML + cTemplate(this.context);
         }
         else {
             this._root.innerHTML = _cachedHeaderHTML + template.render(finalTemplate, this.context);
