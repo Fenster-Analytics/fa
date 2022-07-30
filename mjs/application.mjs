@@ -9,17 +9,6 @@ export class Application extends Element {
         this._user = undefined;
         this._version = 'b1.0';
 
-        // const hashStr = document.location.hash.substring(1);
-        // if (hashStr) {
-        //     const initStateStackDict = common.urlEncodedStrToJson(hashStr);
-        //     const initStateStack = common.kvpObjToArray(initStateStackDict);
-        //     this._stateStack = initStateStack;
-        //     this._flushState();
-        // }
-        // else {
-        //     this.setState({'section': 'home'});
-        // }
-
         common.setApp(this);
 
         window.addEventListener('hashchange', () => {
@@ -32,12 +21,20 @@ export class Application extends Element {
         return {
             'state': this._currentState,
             'user': this._user,
+            'org': 'TEST ORG',
             'version': this._version,
         }
     }
 
     get user() {
         return this._user;
+    }
+
+    syncPageState() {
+        this._stateStack = this.getStateStackFromLocation();
+        this._currentState = this._stateStack[this._stateStack.length - 1];
+        console.log('APP SYNC PAGE STATE', this._stateStack);
+        this.propagatePageState();
     }
 
     getStateStackFromLocation() {
@@ -49,13 +46,6 @@ export class Application extends Element {
             // Default state
             return [{'section': 'home'}];
         }
-    }
-
-    syncPageState() {
-        this._stateStack = this.getStateStackFromLocation();
-        this._currentState = this._stateStack[this._stateStack.length - 1];
-        console.log('SYNC PAGE STATE', this._stateStack);
-        this.updateContent();
     }
 
     getTransformedStateStack(action, state) {
@@ -164,6 +154,9 @@ export class Application extends Element {
     evalFilter(filter) {
         // TODO: Instead of true, maybe return the depth?
         // So depth of zero would become 'active' and anything else 'passive'
+
+        // TODO: This will have to at the element level,
+        // to allow local and hidden states
         return common.matchFilter(this._currentState, filter);
     }
 

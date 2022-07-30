@@ -1,43 +1,126 @@
 <style>
 :host {
 	position: relative;
-	color: green;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: row;
+
 	background: pink;
-	display: grid;
+}
+test-nav-panel {
+	display: flex;
+	flex-direction: column;
+}
+test-nav-panel > nav-section {
+	display: block;
+	padding: 5px;
+	background: white;
+}
+test-nav-panel > nav-section > a {
+	display: block;
+}
+a.active {
+	background: red;
+}
+label {
+	display: block;
 }
 </style>
-<h1>FA TEST</h1>
-<h2>App state {{appState.test}}</h2>
-<div data-bind-template="value">\{{fromJson this}}</div>
-<div data-bind-template>\{{value}}</div>
-<input data-bind-value />
-<div data-bind-template>
-	Status: \{{self.status}}
-	Listval: \{{self.listValue}};
-	
-	\{{#each self.listValue}}
-		<div>List Value: \{{fromJson this}}</div>
-	\{{/each}}
-</div>
+<test-nav-panel>
+	<nav-section>
+		<a
+			is="fa-link"
+			active-filter='{"test-section": "one"}'
+			link-action='add'
+		>
+			Section One
+		</a>
+	</nav-section>
+	<nav-section>
+		<a
+			is="fa-link"
+			active-filter='{"test-section": "two"}'
+			link-action='add'
+		>
+			Section Two
+		</a>
+		<a
+			is="fa-link"
+			active-filter='{"test-modal": "one"}'
+			link-action='add'
+		>
+			Modal Test
+		</a>
+	</nav-section>
+	<nav-section>
+		<label>{{app.user.name}}</label>
+		<!-- <img height="48" width="48" src="{{app.user.picture}}" /> -->
+		<button click-function="logout">
+			Log Out
+		</button>
+	</nav-section>
+</test-nav-panel>
+<test-main-panel>
+	<state-panel>
+		<a
+			is="fa-link"
+			link-action='pop'
+		>
+			POP STATE (back button)
+		</a>
+	</state-panel>
+	<content-panel>
+		<fa-element active-filter='{"test-section": "one"}'>
+			<h1>FA TEST</h1>
+			<div data-bind-template="value">\{{fromJson this}}</div>
+			<div data-bind-template>Value: \{{value}}</div>
+			<input data-bind-value />
+			<div data-bind-template>
+				Status: \{{self.status}}
+				Listval: \{{self.listValue}};
+				
+				\{{#each self.listValue}}
+					<div>List Value: \{{fromJson this}}</div>
+				\{{/each}}
+			</div>
 
-<script element-type="div">
-	Status: \{{self.status}}
-	Listval: \{{self.listValue}};
-	
-	<table>
-	\{{#each self.listValue}}
-		<tr><td>List Value</td><td>\{{fromJson this}}</td></tr>
-	\{{/each}}
-	</table>
-</script>
+			<script element-type="div">
+				Status: \{{self.status}}
+				Listval: \{{self.listValue}};
+				
+				<table>
+				\{{#each self.listValue}}
+					<tr><td>List Value</td><td>\{{fromJson this}}</td></tr>
+				\{{/each}}
+				</table>
+			</script>
 
-<div data-bind-template>
-	{{fromJson user}}
-	<img src="{{user.picture}}" />
-</div>
+			<div data-bind-template>
+				{{fromJson user}}
+				<img src="{{user.picture}}" />
+			</div>
 
-<h1>Elements</h1>
-<div>
-	Progress bar test:
-	<fa-progress data-test="DATA TEST TEXT" value="0.25">this text should not be here</fa-progress>
-</div>
+			<h1>Elements</h1>
+			<div>
+				Progress bar test:
+				<fa-progress data-test="DATA TEST TEXT" value="0.25">this text should not be here</fa-progress>
+			</div>
+			<br/><br/>
+		</fa-element>
+		<fa-element active-filter='{"test-section": "two"}'>
+			SECTION TWO
+		</fa-element>
+		<fa-element	active-filter='{"test-modal": "one"}'>
+			TEST MODAL
+			<a
+				is="fa-link"
+				active-filter='{"test-modal": "one"}'
+				link-action='remove'
+			>
+				Remove Modal
+			</a>
+		</fa-element>
+	</content-panel>
+</test-main-panel>

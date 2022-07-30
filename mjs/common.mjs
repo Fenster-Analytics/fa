@@ -24,7 +24,6 @@ export function assert(b, ...msgArgs) {
 export function matchFilter(state, posFilter) {
     /// Check if the KVPs in posFilter all appear in the currentState
     ///  posFilter RHS can be an array of acceptable values
-
     for(const[key, val] of Object.entries(posFilter)) {
         //const currentVal = currentState[key];
         if (val === '*') {

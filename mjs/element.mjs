@@ -36,7 +36,6 @@ export const ActiveMixIn = (Base) => class extends Base {
         }
 
         this.active = common.getApp().evalFilter(this._activeFilter);
-        console.log('ACTIVE FILTER', this.active);
     }
 
     set active(val) {
@@ -121,6 +120,11 @@ export class Element extends ActiveMixIn(HTMLElement) {
         this._registerListeners();
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute('is-fa-element', true);
+    }
+
     attributeChangedCallback(name, oldVal, newVal) {
         super.attributeChangedCallback(name, oldVal, newVal);
 
@@ -142,7 +146,20 @@ export class Element extends ActiveMixIn(HTMLElement) {
         }
     }
 
+    propagatePageState() {
+        this.updateContent();
+        this._root.querySelectorAll('[is-fa-element]').forEach(el => {
+            el.propagatePageState();
+        });
+    }
+
     _registerListeners() {
+        // window.addEventListener('hashchange', () => {
+        //     this.updateContent();
+        // });
+        // TODO: Broadcast an event to all children
+        // That page state has changed
+
         // Shortcut for binding onClick functions (without doing "this.getRootNode().host.[function]")
         this._root.addEventListener('click', (event) => {
             // Shortcut to trigger click functions

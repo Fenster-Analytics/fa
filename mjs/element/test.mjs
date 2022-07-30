@@ -7,7 +7,7 @@ export class Test extends Element {
         this.status = 'init status';
         this.listValue = ['A', 'B', 'C'];
 
-        console.log('INNER HTML', this.innerHTML);
+        console.log('ORIGINAL HTML', this._originalText);
     }
 
     updateTransients() {
